@@ -20,6 +20,78 @@ const GameScene: React.FC = () => {
   const [movedRight, setMovedRight] = useState<boolean>(false);
   const [bulletPosition, setBulletPosition] = useState<{ x: number; y: number } | null>(null);
   const [initialBulletPosition, setInitialBulletPosition] = useState<{ x: number; y: number } | null>(null);
+  const [bulletDirection, setBulletDirection] = useState<{ x: number; y: number } | null>(null);
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (!containerRef.current) return;
+    
+    const { offsetWidth, offsetHeight } = containerRef.current;
+    setPosition((prev) => {
+
+      if (!prev) return position;
+      
+      let newX = prev.x;
+      let newY = prev.y;
+
+      switch (event.key) {
+        case 'ArrowUp':
+          newY = Math.max(0, prev.y - step);
+          setMovedUp(true);
+          setMovedDown(false);
+          setMovedLeft(false);
+          setMovedRight(false);
+          break;
+        case 'ArrowDown':
+          newY = Math.min(offsetHeight - 16 - playerSize, prev.y + step);
+          setMovedUp(false);
+          setMovedDown(true);
+          setMovedLeft(false);
+          setMovedRight(false);
+          break;
+        case 'ArrowLeft':
+          newX = Math.max(0, prev.x - step);
+          setMovedUp(false);
+          setMovedDown(false);
+          setMovedLeft(true);
+          setMovedRight(false);
+          break;
+        case 'ArrowRight':
+          newX = Math.min(offsetWidth - 16 - playerSize, prev.x + step);
+          setMovedUp(false);
+          setMovedDown(false);
+          setMovedLeft(false);
+          setMovedRight(true);
+          break;
+        default:
+          return prev;
+      }
+
+      return { x: newX, y: newY };
+    });
+  };
+
+  const shoot = (event: KeyboardEvent) => {
+    if (!containerRef.current || !position) return;
+
+    if (event.key === " " && isShooting === false) {
+      setIsShooting((prevIsShooting) => {
+        if (prevIsShooting) return true; 
+        setInitialBulletPosition({
+          x: position.x + playerSize / 2 - 8,
+          y: position.y + playerSize / 2 - 8,
+        });
+        return true;
+      });
+    }
+
+      let direction = { x: 0, y: 0 };
+      if (movedUp) direction = { x: 0, y: -1 };
+      if (movedDown) direction = { x: 0, y: 1 };
+      if (movedLeft) direction = { x: -1, y: 0 };
+      if (movedRight) direction = { x: 1, y: 0 };
+
+      setBulletDirection(direction);
+    }
 
   useEffect(() => {
     if (containerRef.current) {
@@ -71,165 +143,30 @@ const GameScene: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!containerRef.current) return;
-      
-      const { offsetWidth, offsetHeight } = containerRef.current;
-      setPosition((prev) => {
-
-        if (!prev) return position;
-        
-        let newX = prev.x;
-        let newY = prev.y;
-
-        switch (event.key) {
-          case 'ArrowUp':
-            newY = Math.max(0, prev.y - step);
-            setMovedUp(true);
-            setMovedDown(false);
-            setMovedLeft(false);
-            setMovedRight(false);
-            break;
-          case 'ArrowDown':
-            newY = Math.min(offsetHeight - 16 - playerSize, prev.y + step);
-            setMovedUp(false);
-            setMovedDown(true);
-            setMovedLeft(false);
-            setMovedRight(false);
-            break;
-          case 'ArrowLeft':
-            newX = Math.max(0, prev.x - step);
-            setMovedUp(false);
-            setMovedDown(false);
-            setMovedLeft(true);
-            setMovedRight(false);
-            break;
-          case 'ArrowRight':
-            newX = Math.min(offsetWidth - 16 - playerSize, prev.x + step);
-            setMovedUp(false);
-            setMovedDown(false);
-            setMovedLeft(false);
-            setMovedRight(true);
-            break;
-          default:
-            return prev;
-        }
-
-        return { x: newX, y: newY };
-      });
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", shoot);
+  
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", shoot);
     };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [position]);
 
   useEffect(() => {
-    const shoot = (event: KeyboardEvent) => {
-      if (!containerRef.current || !position) return;
-
-      if (event.key === " ") {
-        setIsShooting(true);
-        setInitialBulletPosition({
-          x: position.x + playerSize / 2 - 8,
-          y: position.y + playerSize / 2 - 8
-        })
-        setBulletPosition(initialBulletPosition);
-      }
-    };
-      
-      // const { offsetWidth, offsetHeight } = containerRef.current;
-
-      // if (event.key === " ") {
-      //   setIsShooting(true);
-
-        // if (movedUp) {
-
-        // } else if (movedDown) {
-
-        // } else if (movedLeft) {
-
-        // } else if (movedRight) {
-          
-        // }
-
-    //     switch (true) {
-    //       case movedUp:
-    //         setBulletPosition((prev) => {
-
-    //           if (!prev) return position;
-              
-    //           let newX = prev.x;
-    //           let newY = prev.y;
-
-    //           newY = prev.y - 5*step;
-
-    //           return { x: newX, y: newY };
-    //     })
-    //         break;
-    //       case movedDown:
-    //         setBulletPosition((prev) => {
-
-    //           if (!prev) return position;
-              
-    //           let newX = prev.x;
-    //           let newY = prev.y;
-
-    //           newY = prev.y + 5*step;
-
-    //           return { x: newX, y: newY };
-    //     })
-    //         break;
-    //       case movedLeft:
-    //         setBulletPosition((prev) => {
-
-    //           if (!prev) return position;
-              
-    //           let newX = prev.x;
-    //           let newY = prev.y;
-
-    //           newX = prev.x - 5*step;
-
-    //           return { x: newX, y: newY };
-    //     })
-    //         break;
-    //       case movedRight:
-    //         setBulletPosition((prev) => {
-
-    //           if (!prev) return position;
-              
-    //           let newX = prev.x;
-    //           let newY = prev.y;
-
-    //           newX = prev.x + 5*step;
-
-    //           return { x: newX, y: newY };
-    //     })
-    //         break;
-    //       default:
-    //         setBulletPosition(position);
-
-    //     }
-    //   }
-    // }
-    
-    window.addEventListener('keydown', shoot);
-    return () => window.removeEventListener('keydown', shoot);
-  },[position])
+    if(initialBulletPosition) {
+      setBulletPosition(initialBulletPosition)
+    }
+  }, [initialBulletPosition])
 
   useEffect(() => {
-    if (!isShooting || !bulletPosition || !initialBulletPosition) return;
+    if (!isShooting || !bulletPosition || !initialBulletPosition || !bulletDirection) return;
   
     const interval = setInterval(() => {
       setBulletPosition((prev) => {
         if (!prev) return null;
         
-        let newX = prev.x;
-        let newY = prev.y;
-  
-        if (movedUp) newY -= step;
-        if (movedDown) newY += step;
-        if (movedLeft) newX -= step;
-        if (movedRight) newX += step;
+        let newX = prev.x + bulletDirection.x * step;
+        let newY = prev.y + bulletDirection.y * step;
 
         if (!containerRef.current) return null;
       const { offsetWidth, offsetHeight } = containerRef.current;
@@ -257,7 +194,7 @@ const GameScene: React.FC = () => {
     }, 50);
   
     return () => clearInterval(interval);
-  }, [isShooting, bulletPosition, initialBulletPosition]);
+  }, [isShooting, bulletPosition, initialBulletPosition, bulletDirection]);
   
   // useEffect(() => {
   //   if (!bulletPosition) return;
