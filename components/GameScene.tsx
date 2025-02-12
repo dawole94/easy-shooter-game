@@ -73,15 +73,12 @@ const GameScene: React.FC = () => {
   const shoot = (event: KeyboardEvent) => {
     if (!containerRef.current || !position) return;
 
-    if (event.key === " " && isShooting === false) {
-      setIsShooting((prevIsShooting) => {
-        if (prevIsShooting) return true; 
-        setInitialBulletPosition({
-          x: position.x + playerSize / 2 - 8,
-          y: position.y + playerSize / 2 - 8,
-        });
-        return true;
+    if (event.key === " ") {
+      setInitialBulletPosition({
+        x: position.x + playerSize / 2 - 8,
+        y: position.y + playerSize / 2 - 8,
       });
+      setIsShooting(true);
     }
 
       let direction = { x: 0, y: 0 };
