@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, use } from 'react';
 import Player from './Player';
 import Enemy from './Enemy';
 import Bullet from './Bullet';
@@ -71,7 +71,7 @@ const GameScene: React.FC = () => {
   };
 
   const shoot = (event: KeyboardEvent) => {
-    if (!containerRef.current || !position) return;
+    if (!containerRef.current || !position || isShooting) return;
 
     if (event.key === " ") {
       setInitialBulletPosition({
@@ -79,6 +79,8 @@ const GameScene: React.FC = () => {
         y: position.y + playerSize / 2 - 8,
       });
       setIsShooting(true);
+      
+      
     }
 
       let direction = { x: 0, y: 0 };
@@ -141,13 +143,22 @@ const GameScene: React.FC = () => {
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keydown", shoot);
   
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("keydown", shoot);
+  
+    return () => {
       window.removeEventListener("keydown", shoot);
     };
-  }, [position]);
+  }, [position, isShooting]);
+
+  
+
 
   useEffect(() => {
     if(initialBulletPosition) {
