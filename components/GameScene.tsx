@@ -73,23 +73,24 @@ const GameScene: React.FC = () => {
   const shoot = (event: KeyboardEvent) => {
     if (!containerRef.current || !position || isShooting) return;
 
-    if (event.key === " ") {
-      setInitialBulletPosition({
-        x: position.x + playerSize / 2 - 8,
-        y: position.y + playerSize / 2 - 8,
-      });
-      setIsShooting(true);
-      
-      
-    }
-
-      let direction = { x: 0, y: 0 };
+    let direction = { x: 0, y: 0 };
       if (movedUp) direction = { x: 0, y: -1 };
       if (movedDown) direction = { x: 0, y: 1 };
       if (movedLeft) direction = { x: -1, y: 0 };
       if (movedRight) direction = { x: 1, y: 0 };
 
       setBulletDirection(direction);
+
+    if (event.key === " ") {
+      if (direction.x === 0 && direction.y === 0) return;
+      setInitialBulletPosition({
+        x: position.x + playerSize / 2 - 8,
+        y: position.y + playerSize / 2 - 8,
+      });
+      setIsShooting(true);
+    }
+
+      
     }
 
   useEffect(() => {
