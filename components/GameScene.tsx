@@ -204,6 +204,9 @@ const GameScene: React.FC = () => {
       if (bulletEnemyCollision()) {
         setEnemyLife(enemyLife - 1);
         setIsShooting(false);
+        setBulletPosition(null);
+        setInitialBulletPosition(null);
+        
       }
 
       // if (bulletEnemyCollision()) {
