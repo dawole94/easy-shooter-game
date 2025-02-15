@@ -1,13 +1,14 @@
 import React from 'react'
 
 interface EnemyProps {
-  enemyPosition : {x: number, y: number}
+  enemyPosition : {x: number, y: number},
+  enemyColor : string
 }
 
-const Enemy: React.FC<EnemyProps> = ({enemyPosition}) => {
+const Enemy: React.FC<EnemyProps> = ({enemyPosition, enemyColor}) => {
   return (
     <div 
-    className="w-12 h-12 rounded-tl-full rounded-tr-full bg-red-600 absolute"
+    className={`w-12 h-12 rounded-tl-full rounded-tr-full ${enemyColor} absolute`}
     style={{
         left: `${enemyPosition.x}px`,
         top: `${enemyPosition.y}px`,

@@ -9,6 +9,9 @@ const GameScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const playerSize = 48;
   const enemySize = 48;
+  const [enemyLife, setEnemyLife] = useState<number>(3)
+  const [enemyExists, setEnemyExists] = useState<boolean>(true);
+  const [enemyColor, setEnemyColor] = useState<string>("bg-red-600");
   const step = 20;
   const shootDistance = 200;
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
@@ -21,6 +24,16 @@ const GameScene: React.FC = () => {
   const [bulletPosition, setBulletPosition] = useState<{ x: number; y: number } | null>(null);
   const [initialBulletPosition, setInitialBulletPosition] = useState<{ x: number; y: number } | null>(null);
   const [bulletDirection, setBulletDirection] = useState<{ x: number; y: number } | null>(null);
+
+  function bulletEnemyCollision() {
+    if(!bulletPosition || !enemyPosition) return false; 
+    return (
+      bulletPosition.x <= enemyPosition.x + enemySize &&
+      bulletPosition.x + 16 >= enemyPosition.x &&
+      bulletPosition.y <= enemyPosition.y + enemySize &&
+      bulletPosition.y + 16 >= enemyPosition.y
+    )
+  }
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (!containerRef.current) return;
@@ -137,7 +150,7 @@ const GameScene: React.FC = () => {
   }
 
   useEffect(() => {
-    const interval = setInterval(changeEnemyPosition, 10);
+    const interval = setInterval(changeEnemyPosition, 500);
   
     return () => clearInterval(interval); // Zatrzymanie po unmount
   }, []);
@@ -158,7 +171,15 @@ const GameScene: React.FC = () => {
     };
   }, [position, isShooting]);
 
-  
+  useEffect(() => {
+    if (enemyLife === 2) {
+      setEnemyColor("bg-blue-600");
+    } else if (enemyLife === 1) {
+      setEnemyColor("bg-green-600");
+    } else if (enemyLife <= 0) {
+      setEnemyExists(false);
+    }
+  }, [enemyLife]);
 
 
   useEffect(() => {
@@ -179,6 +200,27 @@ const GameScene: React.FC = () => {
 
         if (!containerRef.current) return null;
       const { offsetWidth, offsetHeight } = containerRef.current;
+
+      if (bulletEnemyCollision()) {
+        setEnemyLife(enemyLife - 1);
+        setIsShooting(false);
+      }
+
+      // if (bulletEnemyCollision()) {
+      //   setEnemyLife((prev) => {
+      //     let newLife = prev - 1;
+      //     if (newLife === 2) {
+      //       setEnemyColor("bg-blue-600");
+      //     } else if (newLife === 1) {
+      //       setEnemyColor("bg-green-600");
+      //     } else if (newLife === 0) {
+      //       setEnemyExists(false);
+      //     }
+      //     return newLife;
+      //   });
+      //   setIsShooting(false);
+      // }
+      
 
       if (
         newX < -20 || newX > offsetWidth - 16 ||
@@ -203,7 +245,7 @@ const GameScene: React.FC = () => {
     }, 50);
   
     return () => clearInterval(interval);
-  }, [isShooting, bulletPosition, initialBulletPosition, bulletDirection]);
+  }, [isShooting, bulletPosition, initialBulletPosition, bulletDirection, enemyLife]);
   
   // useEffect(() => {
   //   if (!bulletPosition) return;
@@ -225,7 +267,7 @@ const GameScene: React.FC = () => {
       className="w-[80vw] h-[80vh] bg-gray-400 border-8 border-blue-300 relative"
     >
       {position && <Player position={position} />}
-      {enemyPosition && <Enemy enemyPosition={enemyPosition}/>}
+      {enemyPosition && enemyExists && <Enemy enemyPosition={enemyPosition} enemyColor={enemyColor}/>}
       {isShooting && bulletPosition && <Bullet bulletPosition={bulletPosition} />}
     </div>
   );
