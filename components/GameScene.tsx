@@ -7,9 +7,14 @@ import Bullet from './Bullet';
 
 const GameScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const leftLifeRef = useRef<HTMLDivElement | null>(null);
+  const middleLifeRef = useRef<HTMLDivElement | null>(null);
+  const rightLifeRef = useRef<HTMLDivElement | null>(null);
   const playerSize = 48;
   const enemySize = 48;
+  const [collisionTime, setCollisionTime] = useState<number>(0);
   const [enemyLife, setEnemyLife] = useState<number>(3)
+  const [playerLife, setPlayerLife] = useState<number>(3)
   const [enemyExists, setEnemyExists] = useState<boolean>(true);
   const [enemyColor, setEnemyColor] = useState<string>("bg-red-600");
   const step = 20;
@@ -249,7 +254,36 @@ const GameScene: React.FC = () => {
   
     return () => clearInterval(interval);
   }, [isShooting, bulletPosition, initialBulletPosition, bulletDirection, enemyLife]);
+
+  function playerEnemyCollision() {
+    if (!position || !enemyPosition) return false;
+    return (
+      position.x < enemyPosition.x + enemySize &&
+      position.x + playerSize > enemyPosition.x &&
+      position.y < enemyPosition.y + enemySize &&
+      position.y + playerSize > enemyPosition.y
+    );
+  }
+
+  useEffect(() => {
+    if (playerEnemyCollision() && collisionTime === 0 || 
+        playerEnemyCollision() && (Date.now() - collisionTime > 2000)) {
+      setCollisionTime(Date.now())
+      setPlayerLife((prev) => Math.max(0, prev - 1))
+    }
+  }, [position, enemyPosition])
   
+  useEffect(() => {
+    if (playerLife === 2) {
+      rightLifeRef.current!.style.display = "none";
+    } else if (playerLife === 1) {
+      middleLifeRef.current!.style.display = "none"
+    } else if (playerLife === 0) {
+      leftLifeRef.current!.style.display = "none"
+      alert("Game Over!");
+      // Możesz np. zresetować grę lub przekierować na ekran końcowy
+    }
+  }, [playerLife]);
   // useEffect(() => {
   //   if (!bulletPosition) return;
     
@@ -269,6 +303,11 @@ const GameScene: React.FC = () => {
       ref={containerRef}
       className="w-[80vw] h-[80vh] bg-gray-400 border-8 border-blue-300 relative"
     >
+      <div className='absolute left-[50%] -translate-x-1/2 top-[-4rem] flex gap-4'>
+        <div ref={leftLifeRef} className='w-8 h-8 rounded-full bg-red-300'></div>
+        <div ref={middleLifeRef} className='w-8 h-8 rounded-full bg-red-300'></div>
+        <div ref={rightLifeRef} className='w-8 h-8 rounded-full bg-red-300'></div>
+      </div>
       {position && <Player position={position} />}
       {enemyPosition && enemyExists && <Enemy enemyPosition={enemyPosition} enemyColor={enemyColor}/>}
       {isShooting && bulletPosition && <Bullet bulletPosition={bulletPosition} />}
