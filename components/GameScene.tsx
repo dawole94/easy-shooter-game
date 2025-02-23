@@ -12,6 +12,8 @@ const GameScene: React.FC = () => {
   const rightLifeRef = useRef<HTMLDivElement | null>(null);
   const playerSize = 48;
   const enemySize = 48;
+  const [enemiesExistance, setEnemiesExistance] = useState<boolean[]>([true, true, true, true])
+  const [isCollision, setIsCollision] = useState<boolean>(false);
   const [collisionTime, setCollisionTime] = useState<number>(0);
   const [enemiesLives, setEnemiesLives] = useState<number[]>([3,3,3,3])
   const [playerLife, setPlayerLife] = useState<number>(3)
@@ -19,7 +21,7 @@ const GameScene: React.FC = () => {
   const step = 20;
   const shootDistance = 200;
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
-  const [enemiesPositions, setEnemiesPositions] = useState<{ x: number; y: number }[]>([]);
+  const [enemiesPositions, setEnemiesPositions] = useState<({ x: number; y: number} | null)[]>([]);
   const [isShooting, setIsShooting] = useState<boolean>(false);
   const [movedUp, setMovedUp] = useState<boolean>(false);
   const [movedDown, setMovedDown] = useState<boolean>(false);
@@ -180,6 +182,9 @@ const GameScene: React.FC = () => {
         if (!prev) return prev;
 
         return prev.map((enemy) => {
+
+          if(!enemy) return null;
+          
             let newX = enemy.x;
             let newY = enemy.y;
 
@@ -204,6 +209,10 @@ const GameScene: React.FC = () => {
     });
 }
 
+useEffect(() => {
+  console.log(enemiesLives);
+  console.log(enemiesColors);
+}, [enemiesLives, enemiesColors]);
 
   useEffect(() => {
     const interval = setInterval(changeEnemyPosition, 500);
@@ -245,15 +254,25 @@ const GameScene: React.FC = () => {
         } else if (enemiesLives[index] === 1) {
           return "bg-green-600";
         } else if (enemiesLives[index] <= 0) {
-          return ""; // Możesz ustawić pusty string lub inną klasę oznaczającą brak wroga
+          enemiesPositions[index] = null;
+          console.log(enemiesPositions);
+          return "bg-red-100"; // Możesz ustawić pusty string lub inną klasę oznaczającą brak wroga
         }
         return color; // Jeśli życie się nie zmieniło, zachowaj dotychczasowy kolor
       })
     );
   
-    setEnemiesPositions((prevPositions) =>
-      prevPositions.filter((_, index) => enemiesLives[index] > 0) // Usuwamy wrogów z zerowym życiem
-    );
+    setEnemiesExistance((prevEnemiesExistance) => {
+      let newEnemiesExistance = [...prevEnemiesExistance];
+      enemiesLives.map((enemyLife, index)=> {
+        if (enemyLife <= 0) {
+          newEnemiesExistance[index] = false;
+        }
+      })
+      return newEnemiesExistance;
+    }
+    )
+    
   }, [enemiesLives]);
 
 
@@ -288,19 +307,47 @@ const GameScene: React.FC = () => {
       //   setInitialBulletPosition(null);
         
       // }
+      //   let i = 0;
+      //  for (i = 0; i++; i<= 4) {
+      //   if (bulletEnemyCollision(i)) {
+      //     // setEnemiesLives((prevLives) => {
+      //     //   const newLives = [...prevLives];
+      //     //   newLives[index] = newLives[index] - 1;
+      //     //   console.log(enemiesLives);
+      //     //   console.log(enemiesColors);
+      //     //   return newLives;
+      //     // });
+      //     setEnemiesLives((prevLives) => {
+      //       console.log("Aktualizacja życia dla index:", i);
+      //       // return prevLives.map((life, index) => 
+      //       //   bulletEnemyCollision(index) && life > 0 ? life - 1 : life
+      //       // );
+      //       for (i = 0; i++; i<= 4) {
 
-      enemiesPositions.forEach((_, index) => {
-        if (bulletEnemyCollision(index)) {
-          setEnemiesLives((prevLives) => {
-            const newLives = [...prevLives];
-            newLives[index] = newLives[index] - 1;
-            return newLives;
-          });
-          setIsShooting(false);
-          setBulletPosition(null);
-          setInitialBulletPosition(null);
+      //       }
+      //     });
+      //     setIsShooting(false);
+      //     setBulletPosition(null);
+      //     setInitialBulletPosition(null);
+      //   }
+      // };
+
+      setEnemiesLives((prevLives) => {
+        let newLives = [...prevLives];
+        let updated = false;
+
+        for(let i=0; i<=3; i++) {
+          if(bulletEnemyCollision(i) && (!updated)) {
+            newLives[i] = prevLives[i] - 0.5;
+            updated = true;
+            setIsShooting(false);
+            setBulletPosition(null);
+            setInitialBulletPosition(null);
+            break;
+          }
         }
-      });
+        return newLives
+      })
 
       // if (bulletEnemyCollision()) {
       //   setEnemyLife((prev) => {
@@ -399,10 +446,10 @@ const GameScene: React.FC = () => {
         <div ref={rightLifeRef} className='w-8 h-8 rounded-full bg-red-300'></div>
       </div>
       {position && <Player position={position} />}
-      {enemiesPositions[0] && <Enemy enemyPosition={enemiesPositions[0]} enemyColor={enemiesColors[0]}/>}
-      {enemiesPositions[1] && <Enemy enemyPosition={enemiesPositions[1]} enemyColor={enemiesColors[1]}/>}
-      {enemiesPositions[2] && <Enemy enemyPosition={enemiesPositions[2]} enemyColor={enemiesColors[2]}/>}
-      {enemiesPositions[3] && <Enemy enemyPosition={enemiesPositions[3]} enemyColor={enemiesColors[3]}/>}
+      {enemiesExistance[0] && enemiesPositions[0] && <Enemy enemyPosition={enemiesPositions[0]} enemyColor={enemiesColors[0]}/>}
+      {enemiesExistance[1] && enemiesPositions[1] && <Enemy enemyPosition={enemiesPositions[1]} enemyColor={enemiesColors[1]}/>}
+      {enemiesExistance[2] && enemiesPositions[2] && <Enemy enemyPosition={enemiesPositions[2]} enemyColor={enemiesColors[2]}/>}
+      {enemiesExistance[3] && enemiesPositions[3] && <Enemy enemyPosition={enemiesPositions[3]} enemyColor={enemiesColors[3]}/>}
       {isShooting && bulletPosition && <Bullet bulletPosition={bulletPosition} />}
     </div>
   );
