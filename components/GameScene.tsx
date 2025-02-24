@@ -12,8 +12,10 @@ const GameScene: React.FC = () => {
   const rightLifeRef = useRef<HTMLDivElement | null>(null);
   const playerSize = 48;
   const enemySize = 48;
+  const [level, setLevel] = useState<number>(1);
+  const [isLevelDone, setIsLevelDone] = useState<boolean>(false);
+  const [isGameWon, setIsGameWon] = useState<boolean>(false);
   const [enemiesExistance, setEnemiesExistance] = useState<boolean[]>([true, true, true, true])
-  const [isCollision, setIsCollision] = useState<boolean>(false);
   const [collisionTime, setCollisionTime] = useState<number>(0);
   const [enemiesLives, setEnemiesLives] = useState<number[]>([3,3,3,3])
   const [playerLife, setPlayerLife] = useState<number>(3)
@@ -136,14 +138,56 @@ const GameScene: React.FC = () => {
         x: offsetWidth / 2 - playerSize / 2,
         y: offsetHeight / 2 - playerSize / 2,
       });
+
+    if (level === 1) {
+      setEnemiesPositions([{x:0,y:0}])
+      setEnemiesExistance([true, false, false, false])
+      setEnemiesLives([3,3,3,3])
+      setEnemiesColors(["bg-red-600","bg-red-600","bg-red-600","bg-red-600"])
+      setPlayerLife(3)
+    } else if (level === 2) {
+      setEnemiesPositions([{x:0,y:0}, {x:500, y:0}])
+      setEnemiesExistance([true, true, false, false])
+      setEnemiesLives([3,3,3,3])
+      setEnemiesColors(["bg-red-600","bg-red-600","bg-red-600","bg-red-600"])
+      setPlayerLife(3)
+    } else if (level === 3) {
+      setEnemiesPositions([{x:0,y:0}, {x:500, y:0}, {x:0, y:500}])
+      setEnemiesExistance([true, true, true, false])
+      setEnemiesLives([3,3,3,3])
+      setEnemiesColors(["bg-red-600","bg-red-600","bg-red-600","bg-red-600"])
+      setPlayerLife(3)
+    } else if (level === 4) {
       setEnemiesPositions([
         {x: 0, y: 0}, 
         {x: 500, y: 0},
         {x: 0, y: 500},
         {x: 500, y:500}
       ])
+      setEnemiesExistance([true, true, true, true])
+      setEnemiesLives([3,3,3,3])
+      setEnemiesColors(["bg-red-600","bg-red-600","bg-red-600","bg-red-600"])
+      setPlayerLife(3)
     }
-  }, []);
+    }
+  }, [level]);
+
+  useEffect(() => {
+    if (enemiesExistance.every((val) => val === false)) {
+      if (level === 1) {
+        setLevel(2);
+        setIsLevelDone(true);
+    } else if (level === 2) {
+      setLevel(3);
+      setIsLevelDone(true);
+    } else if (level === 3) {
+      setLevel(4);
+      setIsLevelDone(true);
+    } else if (level === 4) {
+      setIsGameWon(true)
+    }
+    }
+  }, [enemiesExistance])
 
   // function changeEnemyPosition() {
   //   if (!containerRef.current) return;
@@ -411,7 +455,11 @@ useEffect(() => {
   }, [position, enemiesPositions])
   
   useEffect(() => {
-    if (playerLife === 2) {
+    if(playerLife === 3) {
+      rightLifeRef.current!.style.display = "inline";
+      middleLifeRef.current!.style.display = "inline";
+      leftLifeRef.current!.style.display = "inline"
+    } else if (playerLife === 2) {
       rightLifeRef.current!.style.display = "none";
     } else if (playerLife === 1) {
       middleLifeRef.current!.style.display = "none"
