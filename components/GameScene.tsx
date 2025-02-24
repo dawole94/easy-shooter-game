@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef, use } from 'react';
 import Player from './Player';
 import Enemy from './Enemy';
 import Bullet from './Bullet';
+import LevelComplete from './LevelComplete';
+import GameWon from './GameWon';
 
 const GameScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -184,6 +186,7 @@ const GameScene: React.FC = () => {
       setLevel(4);
       setIsLevelDone(true);
     } else if (level === 4) {
+      setLevel(1)
       setIsGameWon(true)
     }
     }
@@ -456,9 +459,9 @@ useEffect(() => {
   
   useEffect(() => {
     if(playerLife === 3) {
-      rightLifeRef.current!.style.display = "inline";
-      middleLifeRef.current!.style.display = "inline";
-      leftLifeRef.current!.style.display = "inline"
+      if (rightLifeRef.current) rightLifeRef.current.style.display = "inline";
+      if (middleLifeRef.current) middleLifeRef.current.style.display = "inline";
+      if (leftLifeRef.current) leftLifeRef.current.style.display = "inline";
     } else if (playerLife === 2) {
       rightLifeRef.current!.style.display = "none";
     } else if (playerLife === 1) {
@@ -488,6 +491,9 @@ useEffect(() => {
       ref={containerRef}
       className="w-[80vw] h-[80vh] bg-gray-400 border-8 border-blue-300 relative"
     >
+      {isLevelDone || isGameWon ? 
+      isLevelDone ? <LevelComplete setIsLevelDone = {setIsLevelDone}/> : <GameWon setIsGameWon = {setIsGameWon}/> : 
+      <div>
       <div className='absolute left-[50%] -translate-x-1/2 top-[-4rem] flex gap-4'>
         <div ref={leftLifeRef} className='w-8 h-8 rounded-full bg-red-300'></div>
         <div ref={middleLifeRef} className='w-8 h-8 rounded-full bg-red-300'></div>
@@ -499,6 +505,8 @@ useEffect(() => {
       {enemiesExistance[2] && enemiesPositions[2] && <Enemy enemyPosition={enemiesPositions[2]} enemyColor={enemiesColors[2]}/>}
       {enemiesExistance[3] && enemiesPositions[3] && <Enemy enemyPosition={enemiesPositions[3]} enemyColor={enemiesColors[3]}/>}
       {isShooting && bulletPosition && <Bullet bulletPosition={bulletPosition} />}
+      </div>}
+      
     </div>
   );
 };
