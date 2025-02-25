@@ -7,6 +7,7 @@ import Bullet from './Bullet';
 import LevelComplete from './LevelComplete';
 import GameWon from './GameWon';
 import WelcomeWindow from './WelcomeWindow';
+import GameOver from './GameOver';
 
 const GameScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -18,6 +19,7 @@ const GameScene: React.FC = () => {
   const enemySize = 48;
   const [level, setLevel] = useState<number>(1);
   const [isGameBeginning, setIsGameBeginning] = useState<boolean>(true);
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [isLevelDone, setIsLevelDone] = useState<boolean>(false);
   const [isGameWon, setIsGameWon] = useState<boolean>(false);
   const [enemiesExistance, setEnemiesExistance] = useState<boolean[]>([true, true, true, true])
@@ -471,8 +473,51 @@ useEffect(() => {
       middleLifeRef.current!.style.display = "none"
     } else if (playerLife === 0) {
       leftLifeRef.current!.style.display = "none"
-      alert("Game Over!");
-      // Możesz np. zresetować grę lub przekierować na ekran końcowy
+      setIsGameOver(true);
+      setEnemiesLives([3,3,3,3])
+      setEnemiesColors(["bg-red-600","bg-red-600","bg-red-600","bg-red-600"])
+      setPlayerLife(3)
+
+      if (containerRef.current) {
+        const { offsetWidth, offsetHeight } = containerRef.current;
+        setPosition({
+          x: offsetWidth / 2 - playerSize / 2,
+          y: offsetHeight / 2 - playerSize / 2,
+        }); 
+      
+
+      if(level === 1 ) {
+        setEnemiesPositions([{x:0,y:0}])
+        setEnemiesExistance([true, false, false, false])
+      } else if (level === 2) {
+        setEnemiesPositions([{x:0,y:0}, {x: offsetWidth - 2*borderWidth- enemySize , y:0}])
+        setEnemiesExistance([true, true, false, false])
+      } else if (level === 3) {
+        setEnemiesPositions([{x:0,y:0}, {x: offsetWidth - 2*borderWidth- enemySize , y:0}, {x:0, y: offsetHeight - 2*borderWidth - enemySize}])
+        setEnemiesExistance([true, true, true, false])
+      } else if (level === 4) {
+        setEnemiesPositions([
+          {x: 0, y: 0}, 
+          {x: offsetWidth - 2*borderWidth- enemySize , y:0},
+          {x:0, y: offsetHeight - 2*borderWidth - enemySize},
+          {x: offsetWidth - 2*borderWidth- enemySize, y: offsetHeight - 2*borderWidth - enemySize}
+        ])
+        setEnemiesExistance([true, true, true, true])
+      }
+
+    }
+      // setEnemiesPositions([{x:0,y:0}])
+      // setEnemiesExistance([true, false, false, false])
+      // setEnemiesLives([3,3,3,3])
+      // setEnemiesColors(["bg-red-600","bg-red-600","bg-red-600","bg-red-600"])
+      // setPlayerLife(3)
+      // if (containerRef.current) {
+      //   const { offsetWidth, offsetHeight } = containerRef.current;
+      //   setPosition({
+      //     x: offsetWidth / 2 - playerSize / 2,
+      //     y: offsetHeight / 2 - playerSize / 2,
+      //   });
+      // }
     }
   }, [playerLife]);
   // useEffect(() => {
@@ -495,8 +540,9 @@ useEffect(() => {
       className={`w-[80vw] h-[80vh] bg-gray-400 border-${borderWidth} border-blue-300 relative`}
     >
       {isGameBeginning ? <WelcomeWindow setIsGameBeginning={setIsGameBeginning}/> :
-      isLevelDone || isGameWon ? 
-      isLevelDone ? <LevelComplete setIsLevelDone = {setIsLevelDone}/> : <GameWon setIsGameWon = {setIsGameWon}/> : 
+      isLevelDone || isGameWon || isGameOver ? 
+      isLevelDone ? <LevelComplete setIsLevelDone = {setIsLevelDone}/> : 
+      isGameWon ? <GameWon setIsGameWon = {setIsGameWon}/> : <GameOver setIsGameOver={setIsGameOver}/> :
       <div>
       <div className='absolute left-[50%] -translate-x-1/2 top-[-4rem] flex gap-4'>
         <div ref={leftLifeRef} className='w-8 h-8 rounded-full bg-red-300'></div>
