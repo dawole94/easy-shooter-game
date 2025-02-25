@@ -6,15 +6,18 @@ import Enemy from './Enemy';
 import Bullet from './Bullet';
 import LevelComplete from './LevelComplete';
 import GameWon from './GameWon';
+import WelcomeWindow from './WelcomeWindow';
 
 const GameScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const leftLifeRef = useRef<HTMLDivElement | null>(null);
   const middleLifeRef = useRef<HTMLDivElement | null>(null);
   const rightLifeRef = useRef<HTMLDivElement | null>(null);
+  const [borderWidth, setBorderWidth] = useState<number>(8);
   const playerSize = 48;
   const enemySize = 48;
   const [level, setLevel] = useState<number>(1);
+  const [isGameBeginning, setIsGameBeginning] = useState<boolean>(true);
   const [isLevelDone, setIsLevelDone] = useState<boolean>(false);
   const [isGameWon, setIsGameWon] = useState<boolean>(false);
   const [enemiesExistance, setEnemiesExistance] = useState<boolean[]>([true, true, true, true])
@@ -148,13 +151,13 @@ const GameScene: React.FC = () => {
       setEnemiesColors(["bg-red-600","bg-red-600","bg-red-600","bg-red-600"])
       setPlayerLife(3)
     } else if (level === 2) {
-      setEnemiesPositions([{x:0,y:0}, {x:500, y:0}])
+      setEnemiesPositions([{x:0,y:0}, {x: offsetWidth - 2*borderWidth- enemySize , y:0}])
       setEnemiesExistance([true, true, false, false])
       setEnemiesLives([3,3,3,3])
       setEnemiesColors(["bg-red-600","bg-red-600","bg-red-600","bg-red-600"])
       setPlayerLife(3)
     } else if (level === 3) {
-      setEnemiesPositions([{x:0,y:0}, {x:500, y:0}, {x:0, y:500}])
+      setEnemiesPositions([{x:0,y:0}, {x: offsetWidth - 2*borderWidth- enemySize , y:0}, {x:0, y: offsetHeight - 2*borderWidth - enemySize}])
       setEnemiesExistance([true, true, true, false])
       setEnemiesLives([3,3,3,3])
       setEnemiesColors(["bg-red-600","bg-red-600","bg-red-600","bg-red-600"])
@@ -162,9 +165,9 @@ const GameScene: React.FC = () => {
     } else if (level === 4) {
       setEnemiesPositions([
         {x: 0, y: 0}, 
-        {x: 500, y: 0},
-        {x: 0, y: 500},
-        {x: 500, y:500}
+        {x: offsetWidth - 2*borderWidth- enemySize , y:0},
+        {x:0, y: offsetHeight - 2*borderWidth - enemySize},
+        {x: offsetWidth - 2*borderWidth- enemySize, y: offsetHeight - 2*borderWidth - enemySize}
       ])
       setEnemiesExistance([true, true, true, true])
       setEnemiesLives([3,3,3,3])
@@ -489,9 +492,10 @@ useEffect(() => {
   return (
     <div
       ref={containerRef}
-      className="w-[80vw] h-[80vh] bg-gray-400 border-8 border-blue-300 relative"
+      className={`w-[80vw] h-[80vh] bg-gray-400 border-${borderWidth} border-blue-300 relative`}
     >
-      {isLevelDone || isGameWon ? 
+      {isGameBeginning ? <WelcomeWindow setIsGameBeginning={setIsGameBeginning}/> :
+      isLevelDone || isGameWon ? 
       isLevelDone ? <LevelComplete setIsLevelDone = {setIsLevelDone}/> : <GameWon setIsGameWon = {setIsGameWon}/> : 
       <div>
       <div className='absolute left-[50%] -translate-x-1/2 top-[-4rem] flex gap-4'>
